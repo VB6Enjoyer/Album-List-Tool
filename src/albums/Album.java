@@ -71,17 +71,69 @@ public class Album {
 		return year;
 	}
 
-	public String getRating() {
-		return rating + "/100";
+	public int getRating() {
+		return rating;
 	}
 
 	public boolean isReviewed() {
 		return reviewed;
 	}
 
-	public String getReleaseType() {
-		return releaseType.getTypeName();
+	public ReleaseType getReleaseType() {
+		return releaseType;
 	}
 	//--------------------------------------------------------------------------
+
+	@Override
+	public String toString() {
+		String reviewMark = " ";
+		String albumRating = null;
+		String albumType = "";
+		
+		if(this.reviewed == true) {
+			reviewMark = "X";
+		}
+		
+		if(this.getRating() == -1) {
+			albumRating = "  N/A   ";
+		} else {
+			albumRating = "(" + this.getRating() + "/100)";
+		}
+
+		if(this.getReleaseType() != ReleaseType.FULL_LENGTH) {
+			albumType = "[" + this.getReleaseType().getTypeName().toUpperCase() + "]";
+		}
+		
+		String fullAlbumInfo = this.getAlbumArtist().toString() + " - " + this.getAlbumName() + " (" + this.getYear() + ") " + albumType;
+
+		String blankPadding = "";
+		for(int i = 0; i < 103 - fullAlbumInfo.length(); i++)
+			blankPadding = blankPadding.concat(" ");
+		
+		return fullAlbumInfo + blankPadding + albumRating + " " + reviewMark;
+	}
+	
+	public String toStringWithoutReleaseType() {
+		String reviewMark = " ";
+		String albumRating = null;
+		
+		if(this.reviewed == true) {
+			reviewMark = "X";
+		}
+		
+		if(this.getRating() == -1) {
+			albumRating = "  N/A   ";
+		} else {
+			albumRating = "(" + this.getRating() + "/100)";
+		}
+		
+		String fullAlbumInfo = this.getAlbumArtist().toString() + " - " + this.getAlbumName() + " (" + this.getYear() + ")";
+
+		String blankPadding = "";
+		for(int i = 0; i < 103 - fullAlbumInfo.length(); i++)
+			blankPadding = blankPadding.concat(" ");
+		
+		return fullAlbumInfo + blankPadding + albumRating + " " + reviewMark;
+	}
 	
 }

@@ -5,7 +5,7 @@ public enum ReleaseType {
 	EP("EP"), 
 	DEMO("Demo"), 
 	SINGLE("Single"), 
-	LIVE_ALBUM("Live Album"), 
+	LIVE_ALBUM("Live album"), 
 	COMPILATION("Compilation"), 
 	SPLIT("Split"), 
 	COLLABORATION("Collaboration"), 

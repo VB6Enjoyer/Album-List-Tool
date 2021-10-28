@@ -37,8 +37,8 @@ public class List {
 		}
 	}
 
-	// Gets all the unique artists in the list and counts them
-	public void getAllArtists() {
+	// Gets all the unique artists in the list
+	public ArrayList<Artist> getAllArtists() {
 		String line, linePrev = null;
 		ArrayList<Artist> artists = new ArrayList<Artist>();
 
@@ -72,6 +72,13 @@ public class List {
 			e.printStackTrace();
 		}
 
+		return artists;
+	}
+	
+	// Prints and counts all unique artists
+	public void printAllArtists() {
+		ArrayList<Artist> artists = this.getAllArtists();
+		
 		Collections.sort(artists);
 
 		for (Artist a : artists)
@@ -82,11 +89,10 @@ public class List {
 	}
 
 	// Prints all albums and counts them
-	//TODO I don't even know whether all of this works lol
-	public void getAllAlbums() {
+	public ArrayList<Album> getAllAlbums() {
 		String line = null;
 		ArrayList<Album> albums = new ArrayList<Album>();
-		ArrayList<Artist> artists = new ArrayList<Artist>();
+		Artist artist;
 		
 		try {
 			while((line = bufferedReader.readLine()) != null) {
@@ -94,53 +100,45 @@ public class List {
 				
 				// Separates the rest of the info from the album name
 				if(albumName.indexOf("(19") != -1)
-					albumName = albumName.substring(0, albumName.indexOf("(19"));
+					albumName = albumName.substring(0, albumName.indexOf("(19")).trim();
 				
 				if(albumName.indexOf("(20") != -1)
-					albumName = albumName.substring(0, albumName.indexOf("(20"));
+					albumName = albumName.substring(0, albumName.indexOf("(20")).trim();
 				
 				if(albumName.indexOf("(????)") != -1)
-					albumName = albumName.substring(0, albumName.indexOf("(????)"));
-				
-				albumName.trim();
+					albumName = albumName.substring(0, albumName.indexOf("(????)")).trim();
 				
 				//-----------------------------------------------------------
 				
 				String artistName = line.substring(0, line.indexOf(" - ")); // Isolates the artist from the rest of the string
 				
-				if(line.indexOf(" /// ") != -1) {
-					artistName = line.substring(0, line.indexOf(" /// ")); // Separates the first artist from the rest (for split releases)
+				if(artistName.indexOf(" /// ") != -1) {
+					artistName = artistName.substring(0, line.indexOf(" /// ")); // Separates the first artist from the rest (for split releases)
 				}
 				
-				if(line.indexOf("[") > 0) {
-					artistName = line.substring(0, line.indexOf("[")); // Skips alternative names
+				if(artistName.indexOf("[") > 0) {
+					artistName = artistName.substring(0, line.indexOf("[")); // Skips alternative names
 				}
 					
-				if(line.indexOf("{") > 0) {
-					artistName = line.substring(0, line.indexOf("{")); // Skips collaborators (for collaborations)
+				if(artistName.indexOf("{") > 0) {
+					artistName = artistName.substring(0, line.indexOf("{")); // Skips collaborators (for collaborations)
 				}
 				
-				if(!artists.contains(new Artist(artistName)))
-					artists.add(new Artist(artistName));
+				artist = new Artist(artistName);
 				
 				//-----------------------------------------------------------
 				
+				//TODO Might want to implement a mechanism to allow multiple release dates
 				//TODO I should probably optimize this code?
-				String albumYear;
-				
-				albumYear = line.substring(0, 101).trim();
+				String albumYear = line.substring(line.indexOf(" - ") + 3, 100).trim();
 				
 				// Isolates the release year from the rest of the info
 				if(albumYear.indexOf("(19") != -1) {
-					albumYear = albumYear.substring(albumYear.indexOf("(19") + 6);
-					albumYear = albumYear.replace("(", "");
-					albumYear = albumYear.replace(")", "");
+					albumYear = albumYear.substring(albumYear.indexOf("(19") + 1, albumYear.indexOf("(19") + 5);
 				}
 					
 				if(albumYear.indexOf("(20") != -1) {
-					albumYear = albumYear.substring(albumYear.indexOf("(20") + 6);
-					albumYear = albumYear.replace("(", "");
-					albumYear = albumYear.replace(")", "");
+					albumYear = albumYear.substring(albumYear.indexOf("(20") + 1, albumYear.indexOf("(20") + 5);
 				}
 				
 				if(albumYear.indexOf("(????)") != -1)
@@ -149,54 +147,81 @@ public class List {
 				//-----------------------------------------------------------
 				
 				// Isolates the rating of the album
-				String albumRating = line.substring(102, 105).trim();
+				String albumRating = null; //line.substring(line.indexOf("/100") - 3, line.indexOf("/100)")).trim();
 				
-				if(albumRating.indexOf("(") != -1)
+				if(line.indexOf("/100)") != -1) {
+					albumRating = line.substring(line.indexOf("/100") - 3, line.indexOf("/100)")).trim();
 					albumRating = albumRating.replace("(", "").trim();
-				
+				} else {
+					albumRating = "-1"; // If the rating is "N/A" then it sets it to -1
+				}
+					
 				//-----------------------------------------------------------
 				
 				// Checks whether the album has been reviewed or not
 				boolean albumIsReviewed = false;
 				
-				if(line.charAt(111) == 'X') // 111 because Java has 0-based indexing, and ends all strings with a null character
+				if(line.indexOf("/100) X") != -1) // 111 because Java has 0-based indexing, and ends all strings with a null character
 					albumIsReviewed = true;	// otherwise it'd be 113
 				
 				//-----------------------------------------------------------
-				//TODO I need to make it so all albums without an specified release type are taken as full-lengths by default
 				
-				String albumReleaseType = null;
+				// Sets the type of release based on what's on the string, or defaults to full-length
+				String albumReleaseType = line.substring(line.indexOf(" - ") + 3,  100);
 				
 				//TODO I should find a way to optimize this code
-				if(line.indexOf("(19") != -1)
-					albumReleaseType = line.substring(line.indexOf("(19") + 7);
+				if(albumReleaseType.indexOf("(19") != -1) {
+					albumReleaseType = albumReleaseType.substring(albumReleaseType.indexOf("(19") + 7);
+				}
 					
-				if(line.indexOf("(20") != -1)
-					albumReleaseType = line.substring(line.indexOf("(20") + 7);
+				if(albumReleaseType.indexOf("(20") != -1) {
+					albumReleaseType = albumReleaseType.substring(albumReleaseType.indexOf("(20") + 7);
+				}
+					
+				if(albumReleaseType.indexOf("(????)") != -1) {
+					albumReleaseType = albumReleaseType.substring(albumReleaseType.indexOf("(????)") + 7);
+				}
 				
-				if(line.indexOf("(????)") != -1)
-					albumReleaseType = line.substring(line.indexOf("(????)") + 7);
+				// If there's not a [ (which is expected to be followed by the album type, it defaults to full-length.
+				if(albumReleaseType.charAt(0) != '[') {
+					albumReleaseType = "FULL_LENGTH";
+				} else {
+					albumReleaseType = albumReleaseType.substring(1, albumReleaseType.indexOf("]")).toUpperCase().trim();
+					albumReleaseType = albumReleaseType.replace(" ", "_");
+				}
 				
-				albumReleaseType = albumReleaseType.substring(1, albumReleaseType.indexOf("]")).toUpperCase();
-				albumReleaseType = albumReleaseType.replace(" ", "_");
-						
-				//albums.add();
+				//-----------------------------------------------------------
+				
+				albums.add(new Album(albumName, artist, Integer.parseInt(albumYear), Integer.parseInt(albumRating), albumIsReviewed, ReleaseType.valueOf(albumReleaseType)));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
-		Collections.sort(artists);
+		return albums;
+	}
+	
+	// Prints all albums
+	public void printAllAlbums() {
+		ArrayList<Album> albums = this.getAllAlbums();
 		
-		for(Artist a : artists)
-			System.out.println(a.getArtistName());
-		
+		for (Album a : albums)
+			System.out.println(a.toString());
+
 		System.out.println();
-		System.out.println("Total unique artists: " + artists.size());
+		System.out.println("Total releases: " + albums.size());
 	}
 
 	// Shows all albums of the specified release type
 	public void getAlbumsByReleaseType(ReleaseType type) {
+		ArrayList<Album> albums = this.getAllAlbums();
+		albums.removeIf(album -> album.getReleaseType() != type);
+		
+		for (Album a : albums)
+			System.out.println(a.toStringWithoutReleaseType());
+		
+		System.out.println();
+		System.out.println("Total " + type.getTypeName() + " releases: " + albums.size());
 	}
 
 	// Gets all albums released in the specified year
