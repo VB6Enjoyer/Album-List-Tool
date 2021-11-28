@@ -45,7 +45,12 @@ public class App {
 		// albums.printFile();
 		// albums.printAllArtists();
 		// albums.printAllAlbums();
-		 albums.getAlbumsByReleaseType(ReleaseType.FULL_LENGTH);
+		// albums.getAlbumsByReleaseType(ReleaseType.EP);
+	 	// albums.getAlbumsByYear(1979);
+		// albums.getAlbumsByArtist("Led Zeppelin");
+		// albums.getAlbumsByRating(97);
+		// albums.getAverageAlbumRating();
+		albums.getAverageRatingPerYear();
 	}
 
 }

@@ -1,6 +1,6 @@
 package albums;
 
-public class Album {
+public class Album implements Comparable<Album>{
 
 	protected String albumName;
 	protected Artist albumArtist;
@@ -84,14 +84,19 @@ public class Album {
 	}
 	//--------------------------------------------------------------------------
 
+	// ToString methods
+	//--------------------------------------------------------------------------
+	// TODO Unknown release dates are printed as -1, they should be printed as "????"
+	
 	@Override
 	public String toString() {
 		String reviewMark = " ";
 		String albumRating = null;
 		String albumType = "";
+		String releaseYear = String.valueOf(this.getYear());
 		
 		if(this.reviewed == true) {
-			reviewMark = "X";
+			reviewMark = "REVIEWED";
 		}
 		
 		if(this.getRating() == -1) {
@@ -104,7 +109,10 @@ public class Album {
 			albumType = "[" + this.getReleaseType().getTypeName().toUpperCase() + "]";
 		}
 		
-		String fullAlbumInfo = this.getAlbumArtist().toString() + " - " + this.getAlbumName() + " (" + this.getYear() + ") " + albumType;
+		if(releaseYear.equals("-1"))
+			releaseYear = "????";
+	
+		String fullAlbumInfo = this.getAlbumArtist().toString() + " - " + this.getAlbumName() + " (" + releaseYear + ") " + albumType;
 
 		String blankPadding = "";
 		for(int i = 0; i < 103 - fullAlbumInfo.length(); i++)
@@ -116,9 +124,10 @@ public class Album {
 	public String toStringWithoutReleaseType() {
 		String reviewMark = " ";
 		String albumRating = null;
+		String releaseYear = String.valueOf(this.getYear());
 		
 		if(this.reviewed == true) {
-			reviewMark = "X";
+			reviewMark = "REVIEWED";
 		}
 		
 		if(this.getRating() == -1) {
@@ -127,13 +136,81 @@ public class Album {
 			albumRating = "(" + this.getRating() + "/100)";
 		}
 		
-		String fullAlbumInfo = this.getAlbumArtist().toString() + " - " + this.getAlbumName() + " (" + this.getYear() + ")";
+		if(releaseYear.equals("-1"))
+			releaseYear = "????";
+		
+		String fullAlbumInfo = this.getAlbumArtist().toString() + " - " + this.getAlbumName() + " (" + releaseYear + ")";
 
 		String blankPadding = "";
 		for(int i = 0; i < 103 - fullAlbumInfo.length(); i++)
 			blankPadding = blankPadding.concat(" ");
 		
 		return fullAlbumInfo + blankPadding + albumRating + " " + reviewMark;
+	}
+	
+	public String toStringWithoutYear() {
+		String reviewMark = " ";
+		String albumRating = null;
+		
+		if(this.reviewed == true) {
+			reviewMark = "REVIEWED";
+		}
+		
+		if(this.getRating() == -1) {
+			albumRating = "  N/A   ";
+		} else {
+			albumRating = "(" + this.getRating() + "/100)";
+		}
+		
+		String releaseType = "[" + this.getReleaseType().getTypeName() + "]";
+		if(releaseType.equals("[Full-length]"))
+			releaseType = "";
+		
+		String fullAlbumInfo = this.getAlbumArtist().toString() + " - " + this.getAlbumName() + " " + releaseType.toUpperCase();
+
+		String blankPadding = "";
+		for(int i = 0; i < 103 - fullAlbumInfo.length(); i++)
+			blankPadding = blankPadding.concat(" ");
+		
+		return fullAlbumInfo + blankPadding + albumRating + " " + reviewMark;
+	}
+	
+	public String toStringWithoutArtist() {
+		String reviewMark = " ";
+		String albumRating = null;
+		String albumType = "";
+		String releaseYear = String.valueOf(this.getYear());
+		
+		if(this.reviewed == true) {
+			reviewMark = "REVIEWED";
+		}
+		
+		if(this.getRating() == -1) {
+			albumRating = "  N/A   ";
+		} else {
+			albumRating = "(" + this.getRating() + "/100)";
+		}
+
+		if(this.getReleaseType() != ReleaseType.FULL_LENGTH) {
+			albumType = "[" + this.getReleaseType().getTypeName().toUpperCase() + "]";
+		}
+		
+		if(releaseYear.equals("-1"))
+			releaseYear = "????";
+	
+		String fullAlbumInfo = this.getAlbumName() + " (" + releaseYear + ") " + albumType;
+
+		String blankPadding = "";
+		for(int i = 0; i < 103 - fullAlbumInfo.length(); i++)
+			blankPadding = blankPadding.concat(" ");
+		
+		return fullAlbumInfo + blankPadding + albumRating + " " + reviewMark;
+	}
+	//--------------------------------------------------------------------------
+
+	@Override
+	public int compareTo(Album o) {
+		return Integer.compare(getYear(), o.getYear());
 	}
 	
 }

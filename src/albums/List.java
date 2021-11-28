@@ -24,6 +24,9 @@ public class List {
 	// Functions
 	// --------------------------------------------------------------------------
 
+	//TODO Multiple search functions
+	//TODO Need to find a fix for split releases showing up twice
+	
 	// Prints the entire file.
 	public void printFile() {
 		try {
@@ -147,7 +150,7 @@ public class List {
 				//-----------------------------------------------------------
 				
 				// Isolates the rating of the album
-				String albumRating = null; //line.substring(line.indexOf("/100") - 3, line.indexOf("/100)")).trim();
+				String albumRating = null; 
 				
 				if(line.indexOf("/100)") != -1) {
 					albumRating = line.substring(line.indexOf("/100") - 3, line.indexOf("/100)")).trim();
@@ -213,7 +216,7 @@ public class List {
 	}
 
 	// Shows all albums of the specified release type
-	public void getAlbumsByReleaseType(ReleaseType type) {
+	public void getAlbumsByReleaseType(ReleaseType type) { // TODO Probably add a method that lets the user input a String instead of a ReleaseType, maybe let them pick
 		ArrayList<Album> albums = this.getAllAlbums();
 		albums.removeIf(album -> album.getReleaseType() != type);
 		
@@ -221,27 +224,104 @@ public class List {
 			System.out.println(a.toStringWithoutReleaseType());
 		
 		System.out.println();
-		System.out.println("Total " + type.getTypeName() + " releases: " + albums.size());
+		System.out.println("Total " + type.getTypeName() + " releases: " + albums.size()); //TODO Move this sort of stuff to another function
+		//TODO Splits are counted twice and appear twice
 	}
 
 	// Gets all albums released in the specified year
 	public void getAlbumsByYear(int year) {
+		ArrayList<Album> albums = this.getAllAlbums();
+		albums.removeIf(album -> album.getYear() != year);
+		
+		int averageRating = 0;
+		
+		for (Album a : albums) {
+			System.out.println(a.toStringWithoutYear());
+			averageRating += a.getRating();
+		}
+			
+		System.out.println();
+		System.out.println("Total releases from " + year + ": " + albums.size()); //TODO Move this sort of stuff to another function
+		System.out.println();
+		System.out.println("The average album rating from " + year + " is " + averageRating / albums.size());
 	}
 
 	// Gets all albums from an artist
-	public void getAlbumsByArtist(Artist artist) {
+	public void getAlbumsByArtist(String artist) {
+		ArrayList<Album> albums = this.getAllAlbums();
+		albums.removeIf(album -> !album.getAlbumArtist().getArtistName().equals(artist));
+		
+		for (Album a : albums)
+			System.out.println(a.toStringWithoutArtist());
+		
+		System.out.println();
+		System.out.println("Total releases by " + artist + ": " + albums.size());
 	}
 
-	// Gets all albums between the spcified rating range
+	// Gets all albums between the specified rating range
 	public void getAlbumsByRating(int ratingMin, int ratingMax) {
+		ArrayList<Album> albums = this.getAllAlbums();
+		albums.removeIf(album -> album.getRating() < ratingMin || album.getRating() > ratingMax);
+		
+		for (Album a : albums)
+			System.out.println(a.toString());
+		
+		System.out.println();
+		System.out.println("Total releases with a rating between " + ratingMin + " and " + ratingMax + ": " + albums.size());
 	}
-
+	
+	// Gets all albums with a certain rating
+	public void getAlbumsByRating(int rating) {
+		ArrayList<Album> albums = this.getAllAlbums();
+		albums.removeIf(album -> album.getRating() != rating);
+			
+		for (Album a : albums)
+			System.out.println(a.toString());
+			
+		System.out.println();
+		System.out.println("Total releases with a rating of " + rating + "/100: " + albums.size());
+	}
+	
+	// Gets the average album rating across all albums
+	public void getAverageAlbumRating() {
+		ArrayList<Album> albums = this.getAllAlbums();
+		int averageRating = 0;
+			
+		Collections.sort(albums, new AlbumYearComparator());
+			
+		for (Album a : albums)
+			averageRating += a.getRating();
+			
+		System.out.println("The average album rating (across " + albums.size() + " albums) is " + averageRating / albums.size() + "/100");
+	}
+	
 	// Gets the average rating per album of all years
+	// TODO Gotta find a way to order this by rating, maybe through a parameter.
 	public void getAverageRatingPerYear() {
-	}
-
-	// Gets the average rating per album of the specified year
-	public void getAverageRatingOfYear(int year) {
+		ArrayList<Album> albums = this.getAllAlbums();
+		int averageRating = 0, year, auxYear, albumCounter = 0;
+		
+		Collections.sort(albums, new AlbumYearComparator());
+		year = albums.get(0).getYear();
+		
+		for (Album a : albums) {
+			auxYear = a.getYear();
+			
+			if(auxYear != year) {
+				if(year == -1)
+					System.out.println("Unknown: " + averageRating / albumCounter + " (" + albumCounter + " albums)");
+				else
+					System.out.println(year + ": " + averageRating / albumCounter + " (" + albumCounter + " albums)");
+				
+				year = a.getYear();
+				albumCounter = 0;
+				averageRating = 0;
+			}
+			
+			albumCounter++;
+			
+			averageRating += a.getRating();
+		}
 	}
 
 	// Gets all reviewed albums
@@ -307,7 +387,23 @@ public class List {
 	// Finds the specified album by its name
 	public void findAlbumByName(String line) {
 	}
-
+	// --------------------------------------------------------------------------
+	
+	// Auxiliary methods
+	// --------------------------------------------------------------------------
+	
+	/* TODO Doesn't work properly and returns -1 beecause of the way the comparator works
+	   So I might want to create a new comparator or find a workaround for this, or just delete it.
+	*/
+	public int findOldestAlbum() {
+		ArrayList<Album> albums = this.getAllAlbums();
+		int year;
+		
+		Collections.sort(albums, new AlbumYearComparator());
+		year = albums.get(0).getYear();
+		
+		return year;
+	}
 	// --------------------------------------------------------------------------
 
 	// Setters
