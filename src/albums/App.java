@@ -44,13 +44,16 @@ public class App {
 		List albums = new List(new File("Albums.txt"));
 		// albums.printFile();
 		// albums.printAllArtists();
-		// albums.printAllAlbums();
+	    // albums.printAllAlbums();
 		// albums.getAlbumsByReleaseType(ReleaseType.EP);
-	 	// albums.getAlbumsByYear(1979);
-		// albums.getAlbumsByArtist("Led Zeppelin");
-		// albums.getAlbumsByRating(97);
+	 	// albums.getAlbumsByYear(2021);
+		// albums.getAlbumsByArtist("Heroes del Silencio");
+		// albums.getAlbumsByRating(90, 10);
 		// albums.getAverageAlbumRating();
-		albums.getAverageRatingPerYear();
+		// albums.getAverageRatingPerYear();
+		// albums.getAllReviewedAlbums();
+		// albums.getAverageAlbumsPerArtist();
+		albums.getAverageAlbumsPerYear();
 	}
 
 }

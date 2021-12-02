@@ -206,6 +206,33 @@ public class Album implements Comparable<Album>{
 		
 		return fullAlbumInfo + blankPadding + albumRating + " " + reviewMark;
 	}
+	
+	public String toStringWithoutReviewed() {
+		String albumRating = null;
+		String albumType = "";
+		String releaseYear = String.valueOf(this.getYear());
+		
+		if(this.getRating() == -1) {
+			albumRating = "  N/A   ";
+		} else {
+			albumRating = "(" + this.getRating() + "/100)";
+		}
+
+		if(this.getReleaseType() != ReleaseType.FULL_LENGTH) {
+			albumType = "[" + this.getReleaseType().getTypeName().toUpperCase() + "]";
+		}
+		
+		if(releaseYear.equals("-1"))
+			releaseYear = "????";
+	
+		String fullAlbumInfo = this.getAlbumArtist().toString() + " - " + this.getAlbumName() + " (" + releaseYear + ") " + albumType;
+
+		String blankPadding = "";
+		for(int i = 0; i < 103 - fullAlbumInfo.length(); i++)
+			blankPadding = blankPadding.concat(" ");
+		
+		return fullAlbumInfo + blankPadding + albumRating;
+	}
 	//--------------------------------------------------------------------------
 
 	@Override

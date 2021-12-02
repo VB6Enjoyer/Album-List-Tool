@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -41,40 +42,21 @@ public class List {
 	}
 
 	// Gets all the unique artists in the list
+	
 	public ArrayList<Artist> getAllArtists() {
-		String line, linePrev = null;
+		ArrayList<Album> albums = this.getAllAlbums();
 		ArrayList<Artist> artists = new ArrayList<Artist>();
-
-		try {
-			while ((line = bufferedReader.readLine()) != null) {
-				line = line.substring(0, line.indexOf(" - ")); // Isolates the artist from the rest of the string
-
-				if (line.indexOf(" /// ") != -1) {
-					line = line.substring(0, line.indexOf(" /// ")); // Separates the first artist from the rest (for
-																		// split releases)
-				}
-
-				if (line.indexOf("[") > 0) {
-					line = line.substring(0, line.indexOf("[")); // Skips alternative names
-				}
-
-				if (line.indexOf("{") > 0) {
-					line = line.substring(0, line.indexOf("{")); // Skips collaborators (for collaborations)
-				}
-
-				line = line.trim();
-
-				if (linePrev != null && !line.toUpperCase().equals(linePrev.toUpperCase())) {
-					// System.out.println(line);
-					artists.add(new Artist(line));
-				}
-
-				linePrev = line;
+		int i = 0;
+		
+		artists.add(albums.get(0).getAlbumArtist());
+		
+		for(Album a : albums) {
+			if(!a.getAlbumArtist().getArtistName().equals(artists.get(i).getArtistName())) {
+				artists.add(a.getAlbumArtist());
+				i++;
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-
+		
 		return artists;
 	}
 	
@@ -95,7 +77,8 @@ public class List {
 	public ArrayList<Album> getAllAlbums() {
 		String line = null;
 		ArrayList<Album> albums = new ArrayList<Album>();
-		Artist artist;
+		Artist artist = null;
+		int counter = 0;
 		
 		try {
 			while((line = bufferedReader.readLine()) != null) {
@@ -127,8 +110,12 @@ public class List {
 					artistName = artistName.substring(0, line.indexOf("{")); // Skips collaborators (for collaborations)
 				}
 				
-				artist = new Artist(artistName);
-				
+				if(counter > 0 && artistName.equals(albums.get(counter-1).getAlbumArtist().getArtistName())) {
+					artist = albums.get(counter-1).getAlbumArtist();
+				} else {
+					artist = new Artist(artistName);
+				}
+						
 				//-----------------------------------------------------------
 				
 				//TODO Might want to implement a mechanism to allow multiple release dates
@@ -196,6 +183,7 @@ public class List {
 				//-----------------------------------------------------------
 				
 				albums.add(new Album(albumName, artist, Integer.parseInt(albumYear), Integer.parseInt(albumRating), albumIsReviewed, ReleaseType.valueOf(albumReleaseType)));
+				counter++;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -261,13 +249,13 @@ public class List {
 	// Gets all albums between the specified rating range
 	public void getAlbumsByRating(int ratingMin, int ratingMax) {
 		ArrayList<Album> albums = this.getAllAlbums();
-		albums.removeIf(album -> album.getRating() < ratingMin || album.getRating() > ratingMax);
+		albums.removeIf(album -> album.getRating() < Math.min(ratingMin, ratingMax) || album.getRating() > Math.max(ratingMin, ratingMax));
 		
 		for (Album a : albums)
 			System.out.println(a.toString());
 		
 		System.out.println();
-		System.out.println("Total releases with a rating between " + ratingMin + " and " + ratingMax + ": " + albums.size());
+		System.out.println("Total releases with a rating between " + Math.min(ratingMin, ratingMax) + " and " + Math.max(ratingMin, ratingMax) + ": " + albums.size());
 	}
 	
 	// Gets all albums with a certain rating
@@ -326,22 +314,67 @@ public class List {
 
 	// Gets all reviewed albums
 	public void getAllReviewedAlbums() {
+		ArrayList<Album> albums = this.getAllAlbums();
+		albums.removeIf(album -> !album.isReviewed());
+		
+		int averageRating = 0;
+		
+		for (Album a : albums) {
+			System.out.println(a.toStringWithoutReviewed());
+			averageRating += a.getRating();
+		}
+			
+		System.out.println();
+		System.out.println("Total releases reviewed: " + albums.size());
+		System.out.println();
+		System.out.println("The average rating for reviewed albums is " + averageRating / albums.size());
 	}
 
-	// Counts the average number of releases per artist
+	// Counts the average number of releases per every artist
 	public void getAverageAlbumsPerArtist() {
+		ArrayList<Album> albums = this.getAllAlbums();
+		ArrayList<Artist> artists = new ArrayList<Artist>();
+		
+		// TODO this entire code is literally the getAllArtists() function, but for whatever reason
+		// the damn ArrayLists aren't working properly.
+		int i = 0;
+		
+		artists.add(albums.get(0).getAlbumArtist());
+		
+		for(Album a : albums) {
+			if(!a.getAlbumArtist().getArtistName().equals(artists.get(i).getArtistName())) {
+				artists.add(a.getAlbumArtist());
+				i++;
+			}
+		}
+		
+		float avg = (float) albums.size() / artists.size();
+		DecimalFormat decFormat = new DecimalFormat("#.##");
+		
+		System.out.println("You have listened to " + decFormat.format(avg) + " albums per artist.");
 	}
 
-	// Gets the average amount of albums per every discography completed
-	public void getAverageAlbumsPerDiscog() {
-	}
-
-	// Gets the average amount of albums per release year
-	public void getAverageAlbumPerYear() {
-	}
-
-	// Gets the average rating of all albums
-	public void getAverageRatingPerAlbum() {
+	// Gets the average amount of albums per year
+	public void getAverageAlbumsPerYear() {
+		ArrayList<Album> albums = this.getAllAlbums();
+		int years = 0, lastYear = 0, currentYear = 0;
+		
+		Collections.sort(albums, new AlbumYearComparator());
+		lastYear = albums.get(0).getYear();
+		
+		for (Album a : albums) {
+			currentYear = a.getYear();
+			
+			if(currentYear != lastYear) {
+				years++;
+				lastYear = currentYear;
+			}
+		}
+		
+		float avg = (float) albums.size() / years;
+		DecimalFormat decFormat = new DecimalFormat("#.##");
+			
+		System.out.println("The average number of releases per year is " + decFormat.format(avg));
 	}
 
 	// Gets the average rating per album of all artists
@@ -350,6 +383,10 @@ public class List {
 
 	// Gets the average rating per album of the specified artist
 	public void getAverageRatingOfArtist(Artist artist) {
+	}
+	
+	// Gets the average amount of albums per every discography completed
+	public void getAverageAlbumsPerDiscog() {
 	}
 
 	// Counts all albums by type of release
@@ -417,3 +454,43 @@ public class List {
 	}
 	// --------------------------------------------------------------------------
 }
+
+// Old code, in case it needs to be reused
+//--------------------------------------------------------------------------
+
+//public ArrayList<Artist> getAllArtists() {
+//String line, linePrev = null;
+//ArrayList<Artist> artists = new ArrayList<Artist>();
+//
+//try {
+//	while ((line = bufferedReader.readLine()) != null) {
+//		line = line.substring(0, line.indexOf(" - ")); // Isolates the artist from the rest of the string
+//
+//		if (line.indexOf(" /// ") != -1) {
+//			line = line.substring(0, line.indexOf(" /// ")); // Separates the first artist from the rest (for
+//																// split releases)
+//		}
+//
+//		if (line.indexOf("[") > 0) {
+//			line = line.substring(0, line.indexOf("[")); // Skips alternative names
+//		}
+//
+//		if (line.indexOf("{") > 0) {
+//			line = line.substring(0, line.indexOf("{")); // Skips collaborators (for collaborations)
+//		}
+//
+//		line = line.trim();
+//
+//		if (linePrev != null && !line.toUpperCase().equals(linePrev.toUpperCase())) {
+//			// System.out.println(line);
+//			artists.add(new Artist(line));
+//		}
+//
+//		linePrev = line;
+//	}
+//} catch (IOException e) {
+//	e.printStackTrace();
+//}
+//
+//return artists;
+//}
