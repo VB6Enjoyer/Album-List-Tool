@@ -42,7 +42,6 @@ public class List {
 	}
 
 	// Gets all the unique artists in the list
-	
 	public ArrayList<Artist> getAllArtists() {
 		ArrayList<Album> albums = this.getAllAlbums();
 		ArrayList<Artist> artists = new ArrayList<Artist>();
@@ -234,14 +233,25 @@ public class List {
 		System.out.println("The average album rating from " + year + " is " + averageRating / albums.size());
 	}
 
-	// Gets all albums from an artist
-	public void getAlbumsByArtist(String artist) {
+	// Gets all albums by an artist
+	public ArrayList<Album> getAlbumsByArtist(String artist) {
 		ArrayList<Album> albums = this.getAllAlbums();
 		albums.removeIf(album -> !album.getAlbumArtist().getArtistName().equals(artist));
 		
+		return albums;
+	}
+	
+	public int countAlbumsByArtist(String artist) {
+		return getAlbumsByArtist(artist).size();
+	}
+	
+	// Prints all albums by an artist
+	public void printAlbumsByArtist(String artist) {
+		ArrayList<Album> albums = this.getAlbumsByArtist(artist);
+			
 		for (Album a : albums)
 			System.out.println(a.toStringWithoutArtist());
-		
+			
 		System.out.println();
 		System.out.println("Total releases by " + artist + ": " + albums.size());
 	}
@@ -376,15 +386,35 @@ public class List {
 			
 		System.out.println("The average number of releases per year is " + decFormat.format(avg));
 	}
-
+	
+	// Gets the average rating per album of the specified artist
+	public float getAverageRatingOfArtist(String artist) {
+		ArrayList<Album> albums = this.getAlbumsByArtist(artist);
+		float sum = 0;
+			
+		for (Album a : albums)
+			sum += a.getRating();
+		
+		//System.out.println("The average album rating for " + artist + " is " + Math.round(averageRating) + "/100 (" + albums.size() + " releases found).");
+		//System.out.println("Real rating: " + averageRating);
+		
+		return sum / albums.size();
+	}
+	
+	// Gets the average rating per album of the specified artist
+	// TODO Gotta fix this so it counts the number of albums, but ArrayLists work weirdly in Java ffs.
+	public void printAverageRatingOfArtist(String artist) {
+		float averageRating = this.getAverageRatingOfArtist(artist);
+		//int albumCount = this.countAlbumsByArtist(artist);
+		
+		System.out.println("The average album rating for " + artist + " is " + Math.round(averageRating) + "/100"); //(" + albumCount + " releases found).");
+		System.out.println("Real rating: " + averageRating);
+	}
+	
 	// Gets the average rating per album of all artists
 	public void getAverageRatingPerArtist() {
 	}
 
-	// Gets the average rating per album of the specified artist
-	public void getAverageRatingOfArtist(Artist artist) {
-	}
-	
 	// Gets the average amount of albums per every discography completed
 	public void getAverageAlbumsPerDiscog() {
 	}

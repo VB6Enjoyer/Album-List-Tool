@@ -47,13 +47,15 @@ public class App {
 	    // albums.printAllAlbums();
 		// albums.getAlbumsByReleaseType(ReleaseType.EP);
 	 	// albums.getAlbumsByYear(2021);
-		// albums.getAlbumsByArtist("Heroes del Silencio");
+		// albums.printAlbumsByArtist("Aquelarre");
 		// albums.getAlbumsByRating(90, 10);
 		// albums.getAverageAlbumRating();
 		// albums.getAverageRatingPerYear();
 		// albums.getAllReviewedAlbums();
 		// albums.getAverageAlbumsPerArtist();
-		albums.getAverageAlbumsPerYear();
+		// albums.getAverageAlbumsPerYear();
+		// albums.getAverageRatingPerArtist();
+		 albums.printAverageRatingOfArtist("Aquelarre");
 	}
 
 }
